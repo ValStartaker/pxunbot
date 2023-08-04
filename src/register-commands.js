@@ -22,6 +22,10 @@ const commands = [
                 type: ApplicationCommandOptionType.String,
                 required: true,
             },
+    {
+        name: "sampa",
+        description: "converts xsampa to IPA."
+    }
         ]
     }
 ];
