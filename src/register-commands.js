@@ -22,11 +22,23 @@ const commands = [
                 type: ApplicationCommandOptionType.String,
                 required: true,
             },
-    {
-        name: "sampa",
-        description: "converts xsampa to IPA."
-    }
         ]
+    },
+    {
+        name: "xsampa",
+        description: "converts xsampa to IPA.",
+        options: [
+            {
+                name: "xsampa-input",
+                description: "the input for xsampa",
+                type: ApplicationCommandOptionType.String,
+                required: true,
+            }
+        ]
+    },
+    {
+        name: "femboy",
+        description: "sends femboy gif",
     }
 ];
 
@@ -45,6 +57,6 @@ const rest = new REST({ version: "10"}).setToken(process.env.TOKEN);
 
     }
     catch (error) {
-        console.log(`Error: ${error}`)
+        console.log(`Error: ${error}`);
     }
 })();
