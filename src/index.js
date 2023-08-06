@@ -64,10 +64,16 @@ client.on("interactionCreate", (interaction) => {
             );
             break;
 
-        case interaction.commandName === "xsampa":
+        case interaction.commandName === "xsampatoipa":
             const xsampaInput = interaction.options.get("xsampa-input").value;
             xsampaOutput = xsampa2ipa(xsampaInput);
             interaction.reply(xsampaOutput);
+            break;
+
+        case interaction.commandName === "ipatoxsampa":
+            const ipaInput = interaction.options.get("ipa-input").value;
+            ipaOutput = ipa2xsampa(ipaInput);
+            interaction.reply(ipaOutput);
             break;
 
         default:

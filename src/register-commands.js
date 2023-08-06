@@ -25,12 +25,24 @@ const commands = [
         ]
     },
     {
-        name: "xsampa",
+        name: "xsampatoipa",
         description: "converts xsampa to IPA.",
         options: [
             {
                 name: "xsampa-input",
                 description: "the input for xsampa",
+                type: ApplicationCommandOptionType.String,
+                required: true,
+            }
+        ]
+    },
+    {
+        name: "ipatoxsampa",
+        description: "converts IPA to xsampa.",
+        options: [
+            {
+                name: "ipa-input",
+                description: "the input for IPA",
                 type: ApplicationCommandOptionType.String,
                 required: true,
             }
