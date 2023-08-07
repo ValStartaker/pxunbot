@@ -1,0 +1,221 @@
+// Import .env
+require("dotenv").config();
+const { token } = require('./config.json');
+
+const {xsampa2ipa, ipa2xsampa} = require('./xsampa/xsampa-main');
+
+// Import Discord.js classes
+const { Client, IntentsBitField, EmbedBuilder, Collection, Events, GatewayIntentBits } = require("discord.js");
+const fs = require('node:fs');
+const path = require('node:path');
+
+// Create bot client with intents
+const client = new Client({
+    intents: [
+        IntentsBitField.Flags.Guilds,
+        IntentsBitField.Flags.GuildMembers,
+        IntentsBitField.Flags.GuildMessages,
+        IntentsBitField.Flags.MessageContent,
+    ],
+});
+
+client.commands = new Collection();
+
+const commandsPath = path.join(__dirname, 'commands');
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+
+for (const file of commandFiles) {
+	const filePath = path.join(commandsPath, file);
+	const command = require(filePath);
+	// Set a new item in the Collection with the key as the command name and the value as the exported module
+	if ('data' in command && 'execute' in command) {
+		client.commands.set(command.data.name, command);
+	} else {
+		console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+	}
+}
+
+let channel;
+let guild;
+
+
+client.on("ready", (c) => {
+    console.log(`✅ ${c.user.tag} is online.`);
+    client.user.setActivity({
+        name: "PENIS :3",
+    });
+    guild = client.guilds.cache.get(process.env.GUILD_ID);
+    channel = guild.channels.cache.get("956573057999335497");
+});
+
+client.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isChatInputCommand()) return;
+
+	const command = interaction.client.commands.get(interaction.commandName);
+
+	if (!command) {
+		console.error(`No command matching ${interaction.commandName} was found.`);
+		return;
+	}
+
+	try {
+		await command.execute(interaction);
+	} catch (error) {
+		console.error(error);
+		if (interaction.replied || interaction.deferred) {
+			await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+		} else {
+			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+		}
+	}
+});
+
+let CronJob = require("cron").CronJob;
+client.once("ready", () => {
+    let schedule = new CronJob(
+        "0 12 * * Fri",
+        () => {
+            channel.send(
+                "IT'S FUCKING FEMBOY FRIDAY!!! https://tenor.com/view/happy-femboy-friday-friday-femboy-friday-klee-genshin-gif-22610775"
+            );
+        },
+        null,
+        true
+    );
+});
+
+client.on("interactionCreate", (interaction) => {
+    switch (interaction.isChatInputCommand()) {
+        case interaction.commandName === "help":
+            const helpEmbed = new EmbedBuilder()
+            .setTitle("Help")
+            .setColor("Red")
+            .setDescription("Here are all possible commands:")
+            .setImage("https://cdn.discordapp.com/attachments/956573057999335497/1137652588305731685/mebee.png")
+            .addFields(
+                { name: "/help", value: "lists all commands"},
+                { name: "/hai", value: "replies with \"haiiii :3"},
+                { name: "/choose", value: "randomly chooses between two options"},
+                { name: "/femboy", value: "shows the funny femboy gif"},
+                { name: "/xsampatoipa", value: "converts x-sampa text to IPA"},
+                { name: "/ipatoxsampa", value: "converts IPA text to x-sampa"},
+                );
+            interaction.reply({ embeds: [helpEmbed] });
+            break;
+        case interaction.commandName === "hai":
+            interaction.reply("HAIII :333");
+            break;
+
+        case interaction.commandName === "choose":
+            const firstChoice = interaction.options.get("first-choice").value;
+            const secondChoice = interaction.options.get("second-choice").value;
+            Math.random() >= 0.5
+                ? interaction.reply(`I choose... ${firstChoice}!!! :3`)
+                : interaction.reply(`I choose... ${secondChoice}!!! :3`);
+            break;
+
+        case interaction.commandName === "femboy":
+            interaction.reply(
+                "https://cdn.discordapp.com/attachments/203565083421442048/1137201273037406229/femboy.gif"
+            );
+            break;
+
+        case interaction.commandName === "xs":
+            const xsampaInput = interaction.options.get("xsampa-input").value;
+            xsampaOutput = xsampa2ipa(xsampaInput);
+            interaction.reply(xsampaOutput);
+            break;
+
+        case interaction.commandName === "ipa":
+            const ipaInput = interaction.options.get("ipa-input").value;
+            if (!ipaInput) { interaction.reply("cannot take empty string :3");  break;}
+            ipaOutput = ipa2xsampa(ipaInput);
+            interaction.reply(ipaOutput);
+            break;
+
+        default:
+            channel.send("Error! :3");
+            break;
+    }
+});
+
+client.login(token);
+
+require("dotenv").config()
+const { REST, Routes, ApplicationCommandOptionType } = require("discord.js");
+
+const commands = [
+    {
+        name: "hai",
+        description: "replies with haiiii :333",
+    },
+    {
+        name: "choose",
+        description: "Chooses between two options. Separate options with a comma.",
+        options: [
+            {
+                name:"first-choice",
+                description: "The first choice",
+                type: ApplicationCommandOptionType.String,
+                required: true,
+            },
+            {
+                name:"second-choice",
+                description: "The second choice",
+                type: ApplicationCommandOptionType.String,
+                required: true,
+            },
+        ]
+    },
+    {
+        name: "xs",
+        description: "converts xsampa to IPA",
+        options: [
+            {
+                name: "xsampa-input",
+                description: "the input for xsampa",
+                type: ApplicationCommandOptionType.String,
+                required: true,
+            }
+        ]
+    },
+    {
+        name: "ipa",
+        description: "converts IPA to xsampa",
+        options: [
+            {
+                name: "ipa-input",
+                description: "the input for IPA",
+                type: ApplicationCommandOptionType.String,
+                required: true,
+            }
+        ]
+    },
+    {
+        name: "femboy",
+        description: "sends femboy gif",
+    },
+    {
+        name: "help",
+        description: "describes all possible commands"
+    }
+];
+
+const rest = new REST({ version: "10"}).setToken(process.env.TOKEN);
+
+(async () => {
+    try {
+        console.log("Registering slash commands...");
+        await rest.put(
+            Routes.applicationGuildCommands(
+                process.env.CLIENT_ID,
+                process.env.GUILD_ID),
+            { body: commands }
+        )
+        console.log("Slash commands registered.");
+
+    }
+    catch (error) {
+        console.log(`Error: ${error}`);
+    }
+})();
